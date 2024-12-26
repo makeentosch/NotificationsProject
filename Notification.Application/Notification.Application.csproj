@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Notification.Domain\Notification.Domain.csproj" />
+      <ProjectReference Include="..\MailConnectionLib\MailConnectionLib.csproj" />
+      <ProjectReference Include="..\PushConnectionLib\PushConnectionLib.csproj" />
+      <ProjectReference Include="..\SmsConnectionLib\SmsConnectionLib.csproj" />
+    </ItemGroup>
+
+</Project>
