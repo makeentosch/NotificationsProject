@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NotificationServiceDefaults\NotificationServiceDefaults.csproj" />
+      <ProjectReference Include="..\Push.Application\Push.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FirebaseAdmin" Version="3.1.0" />
+    </ItemGroup>
+
+</Project>
