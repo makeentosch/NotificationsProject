@@ -63,6 +63,16 @@ public class NotificationService(
             var status = await mailConnectionService.GetMailStatusAsync(new GetMailStatusRequest(id));
             response.Add((int) NotificationType.Email, status.Status);
         }
+        if (types.Contains(NotificationType.Sms))
+        {
+            var status = await smsConnectionService.GetSmsStatusAsync(new GetSmsStatusRequest(id));
+            response.Add((int) NotificationType.Sms, status.Status);
+        }
+        if (types.Contains(NotificationType.Push))
+        {
+            var status = await pushConnectionService.GetPushStatusAsync(new GetPushStatusRequest(id));
+            response.Add((int) NotificationType.Push, status.Status);
+        }
 
         return response;
     }
