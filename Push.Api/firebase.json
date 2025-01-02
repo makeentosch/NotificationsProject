@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "notification1-cde1d",
+  "private_key_id": "<insertPrivateKeyId>",
+  "private_key": "<insertPrivateKey>",
+  "client_email": "firebase-adminsdk-i0n1k@notification1-cde1d.iam.gserviceaccount.com",
+  "client_id": "<insertClientId>",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-i0n1k%40notification1-cde1d.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
