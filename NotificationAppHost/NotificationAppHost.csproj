@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsAspireHost>true</IsAspireHost>
+        <UserSecretsId>76f8e277-e512-49eb-a124-7eaa9712fed2</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.2"/>
+        <PackageReference Include="Aspire.Hosting.Elasticsearch" Version="8.2.2-preview.1.24521.5" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.2.2" />
+        <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="8.2.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Notification.Api\Notification.Api.csproj" />
+      <ProjectReference Include="..\Mail.Api\Mail.Api.csproj" />
+      <ProjectReference Include="..\Push.Api\Push.Api.csproj" />
+      <ProjectReference Include="..\Sms.Api\Sms.Api.csproj" />
+    </ItemGroup>
+
+</Project>

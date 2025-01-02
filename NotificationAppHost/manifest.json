@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json.schemastore.org/aspire-8.0.json",
+  "resources": {
+    "name": {
+      "type": "parameter.v0",
+      "value": "{name.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true
+        }
+      }
+    },
+    "passwd": {
+      "type": "parameter.v0",
+      "value": "{passwd.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true
+        }
+      }
+    },
+    "rabbitMq": {
+      "type": "container.v0",
+      "connectionString": "amqp://{name.value}:{passwd.value}@{rabbitMq.bindings.tcp.host}:{rabbitMq.bindings.tcp.port}",
+      "image": "docker.io/library/rabbitmq:4.0-management",
+      "env": {
+        "RABBITMQ_DEFAULT_USER": "{name.value}",
+        "RABBITMQ_DEFAULT_PASS": "{passwd.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 5672
+        },
+        "management": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 15672
+        }
+      }
+    },
+    "postgres": {
+      "type": "container.v0",
+      "connectionString": "Host={postgres.bindings.tcp.host};Port={postgres.bindings.tcp.port};Username={name.value};Password={passwd.value}",
+      "image": "docker.io/library/postgres:17.0",
+      "volumes": [
+        {
+          "name": "NotificationAppHost-postgres-data",
+          "target": "/var/lib/postgresql/data",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "POSTGRES_HOST_AUTH_METHOD": "scram-sha-256",
+        "POSTGRES_INITDB_ARGS": "--auth-host=scram-sha-256 --auth-local=scram-sha-256",
+        "POSTGRES_USER": "{name.value}",
+        "POSTGRES_PASSWORD": "{passwd.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 5432
+        }
+      }
+    },
+    "grafana": {
+      "type": "container.v0",
+      "image": "grafana/grafana:latest",
+      "bindMounts": [
+        {
+          "source": "../grafana/config",
+          "target": "/etc/grafana",
+          "readOnly": false
+        },
+        {
+          "source": "../grafana/dashboards",
+          "target": "/var/lib/grafana/dashboards",
+          "readOnly": false
+        },
+        {
+          "source": "../grafana/data",
+          "target": "/var/lib/grafana",
+          "readOnly": false
+        }
+      ],
+      "bindings": {
+        "grafana-http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 3000
+        }
+      }
+    },
+    "prometheus": {
+      "type": "container.v0",
+      "image": "prom/prometheus:latest",
+      "bindMounts": [
+        {
+          "source": "../prometheus",
+          "target": "/etc/prometheus",
+          "readOnly": false
+        },
+        {
+          "source": "../prometheus/data",
+          "target": "/prometheus",
+          "readOnly": false
+        }
+      ],
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 9090
+        }
+      }
+    },
+    "elasticsearch": {
+      "type": "container.v0",
+      "connectionString": "http://elastic:{passwd.value}@{elasticsearch.bindings.http.host}:{elasticsearch.bindings.http.port}",
+      "image": "docker.io/library/elasticsearch:8.15.3",
+      "volumes": [
+        {
+          "name": "NotificationAppHost-elasticsearch-data",
+          "target": "/usr/share/elasticsearch/data",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "discovery.type": "single-node",
+        "xpack.security.enabled": "false",
+        "ELASTIC_PASSWORD": "{passwd.value}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 9200
+        },
+        "internal": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 9300
+        }
+      }
+    },
+    "kibana": {
+      "type": "container.v0",
+      "image": "kibana:8.15.3",
+      "bindMounts": [
+        {
+          "source": "../kibana/config",
+          "target": "/usr/share/kibana/config",
+          "readOnly": false
+        },
+        {
+          "source": "../kibana/data",
+          "target": "/usr/share/kibana/data",
+          "readOnly": false
+        }
+      ],
+      "env": {
+        "ConnectionStrings__elasticsearch": "{elasticsearch.connectionString}",
+        "ELASTICSEARCH_HOSTS": "{elasticsearch.bindings.http.url}"
+      },
+      "bindings": {
+        "kibana-http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http",
+          "targetPort": 5601
+        }
+      }
+    },
+    "postgresNotifications": {
+      "type": "value.v0",
+      "connectionString": "{postgres.connectionString};Database=notifications"
+    },
+    "postgresMails": {
+      "type": "value.v0",
+      "connectionString": "{postgres.connectionString};Database=mails"
+    },
+    "postgresSms": {
+      "type": "value.v0",
+      "connectionString": "{postgres.connectionString};Database=sms"
+    },
+    "postgresPush": {
+      "type": "value.v0",
+      "connectionString": "{postgres.connectionString};Database=push"
+    },
+    "apiNotifications": {
+      "type": "project.v0",
+      "path": "../Notification.Api/Notification.Api.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{apiNotifications.bindings.http.targetPort}",
+        "ConnectionStrings__postgresNotifications": "{postgresNotifications.connectionString}",
+        "ConnectionStrings__rabbitMq": "{rabbitMq.connectionString}",
+        "ConnectionStrings__elasticsearch": "{elasticsearch.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "apiMail": {
+      "type": "project.v0",
+      "path": "../Mail.Api/Mail.Api.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{apiMail.bindings.http.targetPort}",
+        "ConnectionStrings__postgresMails": "{postgresMails.connectionString}",
+        "ConnectionStrings__rabbitMq": "{rabbitMq.connectionString}",
+        "GRAFANA_URL": "{grafana.bindings.grafana-http.url}",
+        "services__apiNotifications__http__0": "{apiNotifications.bindings.http.url}",
+        "services__apiNotifications__https__0": "{apiNotifications.bindings.https.url}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "apiSms": {
+      "type": "project.v0",
+      "path": "../Sms.Api/Sms.Api.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{apiSms.bindings.http.targetPort}",
+        "ConnectionStrings__postgresSms": "{postgresSms.connectionString}",
+        "ConnectionStrings__rabbitMq": "{rabbitMq.connectionString}",
+        "services__apiNotifications__http__0": "{apiNotifications.bindings.http.url}",
+        "services__apiNotifications__https__0": "{apiNotifications.bindings.https.url}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "apiPush": {
+      "type": "project.v0",
+      "path": "../Push.Api/Push.Api.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "HTTP_PORTS": "{apiPush.bindings.http.targetPort}",
+        "ConnectionStrings__postgresPush": "{postgresPush.connectionString}",
+        "ConnectionStrings__rabbitMq": "{rabbitMq.connectionString}",
+        "services__apiNotifications__http__0": "{apiNotifications.bindings.http.url}",
+        "services__apiNotifications__https__0": "{apiNotifications.bindings.https.url}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    }
+  }
+}
