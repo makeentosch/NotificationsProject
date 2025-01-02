@@ -4,7 +4,6 @@ using Moq;
 using Notification.Application;
 using Notification.Domain.Interfaces;
 using Notification.Domain.Models;
-using Notification.Domain.Models.Enums;
 using MailConnectionLib.ConnectionServices;
 using PushConnectionLib.ConnectionServices;
 using SmsConnectionLib.ConnectionServices;

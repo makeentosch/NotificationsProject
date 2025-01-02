@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 1s 
+
+scrape_configs:
+  - job_name: 'gateway'
+    static_configs:
+      - targets: [ 'host.docker.internal:5021' ]
+  - job_name: 'mail'
+    static_configs:
+      - targets: [ 'host.docker.internal:5008' ] 
+  - job_name: 'sms'
+    static_configs:
+      - targets: [ 'host.docker.internal:5222' ]
+  - job_name: 'push'
+    static_configs:
+      - targets: [ 'host.docker.internal:5205' ]
